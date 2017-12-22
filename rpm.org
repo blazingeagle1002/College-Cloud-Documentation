@@ -1,0 +1,192 @@
+#+TITLE: Instructions to create a RPM package
+#+AUTHOR: VLEAD
+#+DATE: [2017-12-13 Wed]
+#+SETUPFILE: ../org-templates/level-1.org
+#+TAGS: boilerplate(b)
+#+EXCLUDE_TAGS: boilerplate
+#+OPTIONS: ^:nil
+
+
+* Introduction
+  RPM is a package management system. The name RPM variously refers to the .rpm file fromat.
+  RPM was intended primarily for GNU/Linux distributions, ex: Fedora, Meego and openSUSE.
+
+* Create an RPM package
+
+** Install RPM
+#+BEGIN_SRC : Install.sh
+sudo apt install rpm
+#+END_SRC
+
+** Create RPM build directory
+#+BEGIN_SRC : Install.sh
+mkdir ~/rpmbuild
+#+END_SRC
+
+** Create SOURCES and SPECS directories in RPM build directory
+#+BEGIN_SRC : Install.sh
+mkdir ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
+#+END_SRC 
+
+** Place the Source of the package inside the SOURCES directory
+** Create a SPEC file in SPECS directory
+
+*** Create a SPEC file
+#+BEGIN_SRC : Install.sh
+cd ~/rpmbuild/SPECS
+rpmdev-newspec PackageName
+#+END_SRC
+
+*** Spec File Template
+#+BEGIN_EXAMPLE
+Name:           PackageName
+Version:        
+Release:        1%{?dist}
+Summary:        
+
+Group:          
+License:        
+URL:            
+Source:        
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  
+Requires:       
+
+%description
+
+
+%prep
+%setup -q
+
+
+%build
+%configure
+make %{?_smp_mflags}
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%doc
+
+
+
+%changelog
+
+
+#+END_EXAMPLE
+
+*** Attributes of Spec file
+
+**** Name
+     The Name line defines what the package will actually be called. 
+     The Name will also be included in the package label, and the package filename. 
+
+**** Version
+     The Version line should be set to the version of the software being packaged. 
+     The Version will also be included in the package label, and the package filename.
+
+**** Release
+     The Release is a number that is used to represent the number of times the 
+     software, at the present version, has been packaged. The Release is also 
+     part of the package label and package filename.
+**** Summary
+     The Summary gives a short description of the packaged software that can be 
+     displayed by RPM.
+
+**** Group
+     The group line is used to hold a string that defines how the packaged software 
+     should be grouped with other packages. The string consists of a series of words 
+     separated by slashes. From left to right, the words describe the packaged software 
+     more explicitly.
+
+     Consider a CD Player. 
+     #+BEGIN_EXAMPLE
+     Group: Applications/Sound
+     #+END_EXAMPLE
+     CD player is  under Applications, because it is an application, 
+     and then under Sound, since it is an application that is sound-related.
+
+**** License
+     The license line is used to hold the packaged software's license information.
+
+**** URL
+     The URL line is used to contain a URL, like the source line. It points to 
+     documentation for the software being packaged.
+
+**** Source
+     The source line serves two purposes:
+     + To document where the packaged software's sources can be found.
+     + To give the name of the source file as it exists in the SOURCES subdirectory. 
+     
+     RPM actually ignores everything prior to the last filename in the source line. 
+     Traditionally, the source line usually contains a Uniform Resource Locator, or URL.
+
+**** BuildRoot
+     It is a deprecated tag.
+
+**** BuildRequires
+     This section contains requirements that are needed to build the package. It can contain
+     either a list of required packages or files.
+
+**** Requires
+     It contains the list of requirements that the package depends on. Requires can contain 
+     either a list of required packages or files. 
+
+**** Description
+     The Description line starts with a percent sign. It is used to provide a more detailed 
+     description of the packaged software than the summary line. The lines of text in 
+     Description should be at most 79 characters long.
+
+**** Prep Section
+     The Prep section is a script which focuses entirely on directing RPM through the 
+     process of preparing the software for building. It is in the Prep section that the 
+     build environment for the software is created, starting with removing the remnants 
+     of any previous builds. Following this, the source archive is expanded.
+
+**** Setup Section
+     It is a macro provided by RPM. Like the Prep section, it cleans up old build trees 
+     and then uncompresses and extracts the files from the original source.
+
+**** Build Section
+     The Build section is the part of the spec file that is responsible for performing 
+     the build. It is a script which builds the package.
+
+**** Install Section
+     The Install section is executed as a sh script, just like Prep and Build. It contains 
+     the installation instructions.
+
+**** Clean Section
+     It is deprecated.
+
+**** Files Section
+     The Files Section contains a list of the files that are part of the package.
+
+**** Defattr Section
+     It is deprecated.
+
+**** Doc Section
+     The list of documentation files are includes under this section.
+
+**** Changelog Section
+     This section is used to describe the last change that has been made to the package.
+
+     The rpmdev-bumpspec utility can be used to get the changelog entry in required format.
+     #+BEGIN_EXAMPLE
+     rpmdev-bumpspec --comment=summary of changes --userstring=Packager's Name <packager's_email> spec file 
+     #+END_EXAMPLE
+
+* Problems Encountered
+  As RPM is intended primarily for Fedora,CentOS etc, package creation could not be 
+  performed in Ubuntu. Hence, RPM could not be used to create package on Ubuntu.
+  Creating a Debian package(deb) is possible on Ubuntu. Hence, this approach was
+  discarded and a new approach to create debian package is followed.
